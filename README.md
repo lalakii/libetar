@@ -6,6 +6,8 @@
 ## API
 ```cs
 Tar.ExtractAll(Stream src, string outputDirectory, bool overrideIfExisting);
+
+Tar.Archive(string inputDirectory, Stream dest); // Create Tar Archive.
 ```
 
 ## Demo
@@ -14,7 +16,13 @@ Tar.ExtractAll(Stream src, string outputDirectory, bool overrideIfExisting);
 using CN.Lalaki.Archive;
 using System.IO;
 using System;
+
 // ...sample code
+
+using (var tar = File.Create("path\\of\\output.example.tar")){ // create tar archive.
+    Tar.Archive("D:\\temp", tar);
+}
+
 using (var tar = File.OpenRead("path\\of\\example.tar")) // tar file extract.
 {
     Tar.ExtractAll(tar, "path\\of\\outputDir\\", true);

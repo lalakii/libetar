@@ -9,6 +9,13 @@ namespace CN.Lalaki.Archive.Demo
     {
         public static void Main()
         {
+            // Create Tar Archive.
+            const string myTarFile = "D:\\tmp\\example.tar";
+            const string inputDir = "D:\\tmp\\example";
+            using var myTar = File.Create(myTarFile);
+            Tar.Archive(inputDir, myTar);
+
+            // Extract Tar Archive.
             const string outDir = "D:\\tmp";
             if (Directory.Exists(outDir))
             {

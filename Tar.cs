@@ -1,13 +1,17 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.IO.Compression;
-using static System.Convert;
 using static System.Text.Encoding;
+using Convert = System.Convert;
 
 namespace CN.Lalaki.Archive
 {
     public static class Tar
     {
+        private const long BlockSize = 512L;
         private const int BufSize = 40960;
+        private static readonly byte[] Magic = ASCII.GetBytes("ustar\000");
+        private static readonly byte[] Permission = ASCII.GetBytes("0000755\0");
 
         private enum TypeFlag
         {
@@ -22,6 +26,107 @@ namespace CN.Lalaki.Archive
             CONTTYPE = '7',
             XGLTYPE = 'g',
             XHDTYPE = 'x',
+        }
+
+        public static void Archive(string inputDir, Stream ts)
+        {
+            if (!Directory.Exists(inputDir))
+            {
+                throw new IOException("Input directory cannot be null or empty.");
+            }
+
+            if (!ts.CanWrite)
+            {
+                throw new IOException("Unable to write stream.");
+            }
+
+            var dirs = Directory.GetFileSystemEntries(inputDir, "*", SearchOption.AllDirectories);
+            var fullPath = Path.GetDirectoryName(inputDir);
+            var data = new byte[BlockSize];
+            foreach (var child in dirs)
+            {
+                for (int i = 0; i < BlockSize; i++)
+                {
+                    data[i] = 0;
+                }
+
+                var path = child.Replace(fullPath, string.Empty).Replace('\\', '/').TrimStart('/');
+                var attrs = File.GetAttributes(child);
+                if (attrs.HasFlag(FileAttributes.ReparsePoint))
+                {
+                    data[156] = (int)TypeFlag.SYMTYPE;
+                }
+                else if (attrs.HasFlag(FileAttributes.Directory))
+                {
+                    data[156] = (int)TypeFlag.DIRTYPE;
+                    path += "/";
+                }
+                else
+                {
+                    data[156] = (int)TypeFlag.REGTYPE;
+                }
+
+                var pathBytes = UTF8.GetBytes(path);
+                if (pathBytes.Length > 100)
+                {
+                    int index = Array.FindLastIndex(pathBytes, 100, 100, (s) => s == '/');
+                    if (index != -1)
+                    {
+                        if (index == pathBytes.Length)
+                        {
+                            data[0] = (int)'/';
+                        }
+                        else
+                        {
+                            Buffer.BlockCopy(pathBytes, 0, data, 0, index + 1);
+                        }
+
+                        Buffer.BlockCopy(pathBytes, 0, data, 345, index);
+                    }
+                }
+                else
+                {
+                    pathBytes.CopyTo(data, 0);
+                }
+
+                Buffer.BlockCopy(Permission, 0, data, 100, Permission.Length);
+                ASCII.GetBytes(Convert.ToString(((DateTimeOffset)File.GetLastWriteTime(child)).ToUnixTimeSeconds(), 8)).CopyTo(data, 136);
+                FileStream fs = null;
+                if (data[156] == (int)TypeFlag.REGTYPE)
+                {
+                    fs = File.OpenRead(child);
+                    ASCII.GetBytes($"{Convert.ToString(fs.Length, 8).PadLeft(11, '0')}\0").CopyTo(data, 124);
+                }
+
+                Buffer.BlockCopy(Magic, 0, data, 257, Magic.Length);
+                uint cksum = 256U;
+                for (uint i = 0U; i < 148U; i++)
+                {
+                    cksum += data[i];
+                }
+
+                for (uint i = 155U; i < 500U; i++)
+                {
+                    cksum += data[i];
+                }
+
+                ASCII.GetBytes($"{Convert.ToString(cksum, 8).PadLeft(6, '0')}\0 ").CopyTo(data, 148);
+                ts.Write(data, 0, data.Length);
+
+                if (fs != null)
+                {
+                    fs.CopyTo(ts);
+                    fs.Dispose();
+                    var end = BlockSize - ts.Position & 511L;
+                    for (uint i = 0U; i < end; i++)
+                    {
+                        ts.WriteByte(0);
+                    }
+                }
+            }
+
+            ts.SetLength(ts.Position + BlockSize);
+            ts.Dispose();
         }
 
         public static void ExtractAll(Stream ts, string outDir, bool mOverride)
@@ -87,7 +192,7 @@ namespace CN.Lalaki.Archive
                     break;
                 }
 
-                uint cksum = ToUInt32(ASCII.GetString(buf, 148, 8).TrimEnd('\0'), 8);
+                uint cksum = Convert.ToUInt32(ASCII.GetString(buf, 148, 8).TrimEnd('\0'), 8);
                 uint vcksum = 256U;
                 for (uint i = 0U; i < 148U; i++)
                 {
@@ -106,7 +211,7 @@ namespace CN.Lalaki.Archive
                 }
 
                 ts.Position += 12L;
-                var fileSize = ToInt64(ASCII.GetString(buf, 124, 12).TrimEnd('\0'), 8);
+                var fileSize = Convert.ToInt64(ASCII.GetString(buf, 124, 12).TrimEnd('\0'), 8);
                 var type = (TypeFlag)buf[156];
                 var prefix = UTF8.GetString(buf, 345, 155).TrimEnd('\0');
                 if (!string.IsNullOrWhiteSpace(prefix))
@@ -167,7 +272,7 @@ namespace CN.Lalaki.Archive
                         break;
                 }
 
-                ts.Position += 512L - ts.Position & 511L;
+                ts.Position += BlockSize - ts.Position & 511L;
             }
 
             ReleaseStreams(ts, fs);
