@@ -41,7 +41,7 @@
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Tar.cs" />
+    <Compile Include="src\Tar.cs" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -55,6 +55,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>lalaki_sign "$(TargetPath)" &gt; NUL 2&gt;&amp;1 &amp;</PostBuildEvent>
+    <PostBuildEvent>lalaki_sign "$(TargetPath)" &gt; NUL 2&gt;&amp;1 &amp;&amp; cd "$(ProjectDir)" &amp;&amp; gen_pkg.bat</PostBuildEvent>
   </PropertyGroup>
 </Project>

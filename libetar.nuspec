@@ -3,14 +3,14 @@
 	<metadata>
 		<icon>Icon.png</icon>
 		<id>libetar</id>
-		<version>1.1.0</version>
-		<title>LibeTar - Tar or Tar.Gz File Extract.</title>
+		<version>1.2.0</version>
+		<title>LibeTar - Creating and Extracting Tar Archives.</title>
 		<authors>lalaki</authors>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<license type="expression">MIT</license>
 		<projectUrl>https://github.com/lalakii/libetar</projectUrl>
 		<description>libetar is a lightweight C# library for extracting TAR archives. It provides a simple API to extract all files from TAR files.</description>
-		<releaseNotes>v1.0.0 Supported extractions: tar, tar.gz&#10;v1.0.1 Supports processing of paths with a length of 255 bytes.&#10;v1.0.2 Add Header Checksum.&#10;v1.0.3 Optimize resource release.&#10;v1.0.5 Add Tar Archive.</releaseNotes>
+		<releaseNotes>v1.0.0 Supported extractions: tar, tar.gz&#10;v1.0.1 Supports processing of paths with a length of 255 bytes.&#10;v1.0.2 Add Header Checksum.&#10;v1.0.3 Optimize resource release.&#10;...&#10;v1.1.0 Add Tar Archive.&#10;v1.2.0 Optimize code - release.</releaseNotes>
 		<copyright>Copyright (C) 2025 lalaki.cn</copyright>
 		<tags>tar extract archive gzip windows decompress netframework</tags>
 		<repository type="git" url="https://github.com/lalakii/libetar" />

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.13.35617.110
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libetar", "libetar.csproj", "{9C705B85-E5C0-4867-B23E-F98BBFFEEDA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "demo", "demo.csproj", "{3557EBBB-9379-47DA-9502-6244707F8301}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "demo", "demo\demo.csproj", "{3557EBBB-9379-47DA-9502-6244707F8301}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

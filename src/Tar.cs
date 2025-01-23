@@ -141,29 +141,30 @@ namespace CN.Lalaki.Archive
                 throw new IOException("Output directory cannot be null or empty.");
             }
 
-            FileStream fs = null;
-            if (ts is not GZipStream gz)
+            Stream fs = null;
+            if (ts is not GZipStream)
             {
                 var pos = ts.Position;
-                var tarGz = ts.ReadByte() == 0x1F && ts.ReadByte() == 0x8B;
-                ts.Position = pos;
-                if (tarGz)
+                if (ts.ReadByte() == 0x1F && ts.ReadByte() == 0x8B)
                 {
-                    gz = new(ts, CompressionMode.Decompress);
-                    fs = CreateTempFile();
-                    gz.CopyTo(fs);
-                    fs.Position = 0L;
-                    gz.Dispose();
-                    ts.Dispose();
-                    ts = fs;
+                    fs = new GZipStream(ts, CompressionMode.Decompress);
                 }
+
+                ts.Position = pos;
             }
             else
             {
-                ts = fs = CreateTempFile();
-                gz.CopyTo(fs);
-                ts.Position = 0L;
-                gz.Dispose();
+                fs = ts;
+            }
+
+            if (fs is GZipStream gz)
+            {
+                ts = fs = File.Create(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()));
+                using (gz)
+                {
+                    gz.CopyTo(fs);
+                    ts.Position = 0L;
+                }
             }
 
             if (!Directory.Exists(outDir))
@@ -276,11 +277,6 @@ namespace CN.Lalaki.Archive
             }
 
             ReleaseStreams(ts, fs);
-        }
-
-        private static FileStream CreateTempFile()
-        {
-            return File.Create(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()));
         }
 
         private static void ReleaseStreams(Stream ts, Stream fs)
