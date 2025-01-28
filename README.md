@@ -1,7 +1,7 @@
-# LibeTar
-[![Available on NuGet https://www.nuget.org/packages?q=libetar](https://img.shields.io/nuget/v/libetar.svg?style=flat-square)](https://www.nuget.org/packages?q=libetar)
+# LibeTar -> Migrate to [LibTar](https://github.com/lalakii/libtar)
+~[![Available on NuGet https://www.nuget.org/packages?q=libetar](https://img.shields.io/nuget/v/libetar.svg?style=flat-square)](https://www.nuget.org/packages?q=libetar)~
 
-[libetar](https://www.nuget.org/packages?q=libetar) is a lightweight C# library for extracting TAR archives. It provides a simple API to extract all files from TAR archives.
+~[libetar](https://www.nuget.org/packages?q=libetar) is a lightweight C# library for extracting TAR archives. It provides a simple API to extract all files from TAR archives.~
 
 ## API
 ```cs
